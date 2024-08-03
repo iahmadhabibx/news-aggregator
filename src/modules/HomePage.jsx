@@ -9,6 +9,7 @@ const HomePage = () => {
   const { isLoading, onGetArticles } = useArticles();
   const [articles, setArticles] = useState([]);
   const [sources, setSources] = useState([]);
+  const [authors, setAuthors] = useState([]);
   const [params, setParams] = useState({
     search: "a",
     page: 1,
@@ -36,8 +37,17 @@ const HomePage = () => {
           .filter((source) => source && typeof source === "string")
       ),
     ];
+   
+    const uniqueAuthors = [
+      ...new Set(
+        data
+          ?.map((item) => item.author)
+          .filter((author) => author && typeof author === "string")
+      ),
+    ];
 
     setSources(uniqueSources);
+    setAuthors(uniqueAuthors);
     setArticles(data);
   };
 
@@ -60,6 +70,7 @@ const HomePage = () => {
       <Header
         isLoading={isLoading}
         sources={sources}
+        authors={authors}
         onFilter={onFilter}
         onSearch={onGetArticlesWithSearch}
       />

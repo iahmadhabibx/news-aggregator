@@ -1,11 +1,13 @@
 import axios from "axios";
 import { useState } from "react";
+import useFilterStore from "../store/filter";
 
 const NEWS_API_URL = "https://newsapi.org/v2/everything";
 const GUARDIAN_API_URL = "https://content.guardianapis.com/search";
 const NYT_API_URL = "https://api.nytimes.com/svc/search/v2/articlesearch.json";
 
 const useArticles = () => {
+  const { author, source } = useFilterStore();
   const [isLoading, setLoading] = useState(false);
 
   const fetchArticles = async (url, queryParams) => {
@@ -91,11 +93,16 @@ const useArticles = () => {
     setLoading(false);
 
     if (!filter) return results?.filter((r) => r.content !== "[Removed]");
-
+    else if (author || source)
+      return results?.filter((r) => r.author === author || r.source === source);
     switch (filter.type) {
       case "source":
         return results.filter(
           (s) => s.source?.toLowerCase() === filter.value?.toLowerCase()
+        );
+      case "author":
+        return results.filter(
+          (s) => s.author?.toLowerCase() === filter.value?.toLowerCase()
         );
 
       case "sources":

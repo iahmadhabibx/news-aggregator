@@ -18,14 +18,17 @@ import { ChevronDownIcon } from "@chakra-ui/icons";
 import useDebounce from "../hooks/useDebounce";
 import useFilterStore from "../store/filter";
 
-const Header = ({ isLoading, onSearch, sources, onFilter }) => {
-  const [selectedFilter, setSelectedFilter] = useState("");
+const Header = ({ isLoading, onSearch, authors, sources, onFilter }) => {
   const [searchDate, setSearchDate] = useState("");
   const debouncedSearchTerm = useDebounce(searchDate, 1500);
   const {
     sources: zustandSources,
     setSources,
     removeSource,
+    setAuthor,
+    setSource,
+    author,
+    source: zustandSource,
   } = useFilterStore((state) => state);
 
   useEffect(() => {
@@ -40,9 +43,9 @@ const Header = ({ isLoading, onSearch, sources, onFilter }) => {
         flexDirection={{ base: "column", md: "row" }}
       >
         {isLoading ? (
-            <Skeleton w={"250px"} h={"40px"} />
-        ): (
-            <Search onSearch={onSearch} />
+          <Skeleton w={"250px"} h={"40px"} />
+        ) : (
+          <Search onSearch={onSearch} />
         )}
         <Flex
           alignItems={"center"}
@@ -59,18 +62,48 @@ const Header = ({ isLoading, onSearch, sources, onFilter }) => {
                   rightIcon={<ChevronDownIcon />}
                   fontSize={{ base: "12px", md: "16px" }}
                 >
-                  {selectedFilter || "Filter"}
+                  {zustandSource || "Filter"}
                 </MenuButton>
                 <MenuList>
                   {React.Children.toArray(
                     sources.map((source) => (
                       <MenuItem
                         onClick={() => {
-                          setSelectedFilter(source);
+                          setSource(source);
                           onFilter("source", source);
                         }}
                       >
                         {source}
+                      </MenuItem>
+                    ))
+                  )}
+                </MenuList>
+              </Menu>
+            )
+          )}
+
+          {isLoading ? (
+            <Skeleton w={"80px"} h={"40px"} />
+          ) : (
+            authors.length > 0 && (
+              <Menu>
+                <MenuButton
+                  as={Button}
+                  rightIcon={<ChevronDownIcon />}
+                  fontSize={{ base: "12px", md: "16px" }}
+                >
+                  {author || "Author"}
+                </MenuButton>
+                <MenuList>
+                  {React.Children.toArray(
+                    authors.map((author) => (
+                      <MenuItem
+                        onClick={() => {
+                          setAuthor(author);
+                          onFilter("author", author);
+                        }}
+                      >
+                        {author}
                       </MenuItem>
                     ))
                   )}
@@ -94,7 +127,11 @@ const Header = ({ isLoading, onSearch, sources, onFilter }) => {
       </HStack>
 
       <HStack alignItems={"center"} justifyContent={"center"} pt={3}>
-        {isLoading ? <Skeleton w={"80px"} h={"40px"} />: <Text fontWeight={"bold"}>Sources:</Text>}
+        {isLoading ? (
+          <Skeleton w={"80px"} h={"40px"} />
+        ) : (
+          <Text fontWeight={"bold"}>Sources:</Text>
+        )}
         <Flex direction={"row"} flexWrap={"wrap"} gap={3}>
           {React.Children.toArray(
             sources.map((source) => (
@@ -121,6 +158,16 @@ const Header = ({ isLoading, onSearch, sources, onFilter }) => {
             ))
           )}
         </Flex>
+
+        <Button
+          size={"sm"}
+          variant={"solid"}
+          bg={"red"}
+          color={"white"}
+          onClick={() => window.location.reload()}
+        >
+          x Clear Filters
+        </Button>
       </HStack>
     </Box>
   );
